@@ -1,4 +1,9 @@
+" TODO see if every possible message are documented somewhere (to get rid of these signs everywhere even if somebody don't want them)
+" TODO 
+
 let s:go_analyzer_signs = {}
+let s:go_analyzer_enabled = 0
+let g:go_analyzer_show_signs = 1
 
 function! go_analyzer#Analyze()
     call go_analyzer#reset()
@@ -19,22 +24,34 @@ function! go_analyzer#Analyze()
             endif
 
             if len(l:sign_type) > 0 && get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
+                let s:go_analyzer_enabled = 1
                 let s:go_analyzer_signs[l:lineNo] = get(s:go_analyzer_signs, l:lineNo, '') . l:sign_type
                 call go_analyzer#add_to_list(line)
             endif
         endif
     endfor
 
-    for [line, type] in items(s:go_analyzer_signs)
-        exe ':sign place '.line.' group=go_analyzer line='.line.' name=go_analyzer_'.type.' file='.expand('%:p')
-    endfor
-
+    if g:go_analyzer_show_signs ==# 1
+        call go_analyzer#add_signs()
+    endif
 
     cwindow
 endfunction
 
+function go_analyzer#add_signs()
+    for [line, type] in items(s:go_analyzer_signs)
+        execute ':sign place '.line.' group=go_analyzer line='.line.' name=go_analyzer_'.type.' file='.expand('%:p')
+    endfor
+endfunction
+
+function go_analyzer#remove_signs()
+    for [line, type] in items(s:go_analyzer_signs)
+        execute 'sign unplace '.line.' group=go_analyzer file='.expand('%:p')
+    endfor
+endfunction
+
 function! go_analyzer#Toggle()
-    if len(s:go_analyzer_signs) == 0
+    if s:go_analyzer_enabled == 0
         call go_analyzer#Analyze()
     else
         call go_analyzer#reset()
@@ -45,9 +62,7 @@ function! go_analyzer#reset()
     call go_analyzer#close_list()
     call go_analyzer#clear_list()
 
-    for [line, type] in items(s:go_analyzer_signs)
-        exe 'sign unplace '.line.' group=go_analyzer file='.expand('%:p')
-    endfor
+    call go_analyzer#remove_signs()
 
     let s:go_analyzer_signs = {}
 endfunction
