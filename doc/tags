@@ -1,0 +1,7 @@
+g:go_analyzer_custom_signs	go-analyzer.vim.txt	/*g:go_analyzer_custom_signs*
+g:go_analyzer_list_type	go-analyzer.vim.txt	/*g:go_analyzer_list_type*
+go-analyzer.vim	go-analyzer.vim.txt	/*go-analyzer.vim*
+go-analyzer.vim-config	go-analyzer.vim.txt	/*go-analyzer.vim-config*
+go-analyzer.vim-contents	go-analyzer.vim.txt	/*go-analyzer.vim-contents*
+go-analyzer.vim-intro	go-analyzer.vim.txt	/*go-analyzer.vim-intro*
+go-analyzer.vim.txt	go-analyzer.vim.txt	/*go-analyzer.vim.txt*

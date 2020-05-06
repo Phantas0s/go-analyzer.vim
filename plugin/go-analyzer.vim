@@ -8,6 +8,19 @@ if !exists('g:go_analyzer_list_type')
     let g:go_analyzer_list_type = 'quickfix'
 endif
 
+
+if !exists('g:go_analyzer_show_signs')
+    ""
+    " Show signs in the gutter
+    let g:go_analyzer_show_signs = 1
+endif
+
+if !exists('g:go_analyzer_regex')
+    ""
+    " Only display lines of the analyzer matching some regex
+    let g:go_analyzer_regex = {'escape': 'escapes to heap', 'inline': 'inlining call'}
+endif
+
 if !exists('g:go_analyzer_custom_signs')
     ""
     " Default highlighting, use let g:go_analyzer_custom_signs = 0 to disable

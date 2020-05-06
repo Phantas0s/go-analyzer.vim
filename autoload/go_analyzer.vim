@@ -3,7 +3,6 @@
 
 let s:go_analyzer_signs = {}
 let s:go_analyzer_enabled = 0
-let g:go_analyzer_show_signs = 1
 
 function! go_analyzer#Analyze()
     call go_analyzer#reset()
@@ -14,14 +13,22 @@ function! go_analyzer#Analyze()
         if  line =~# expand('%')
             let l:pos = split(line, ':')
             let l:lineNo = 0 + l:pos[1]
+
+            " let l:sign_type = ''
+            " if line =~# 'escapes to heap'
+            "     let l:sign_type = 'escape'
+            " elseif line =~# 'inlining call'
+            "     let l:sign_type = 'inline'
+            " else
+            "     continue
+            " endif
+
             let l:sign_type = ''
-            if line =~# 'escapes to heap'
-                let l:sign_type = 'escape'
-            elseif line =~# 'inlining call'
-                let l:sign_type = 'inline'
-            else
-                continue
-            endif
+            for [sign_type, regex] in items(g:go_analyzer_regex)
+                if line =~# regex
+                    let l:sign_type = sign_type
+                endif
+            endfor
 
             if len(l:sign_type) > 0 && get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
                 let s:go_analyzer_enabled = 1
@@ -65,6 +72,8 @@ function! go_analyzer#reset()
     call go_analyzer#remove_signs()
 
     let s:go_analyzer_signs = {}
+    let s:go_analyzer_enabled = 0
+
 endfunction
 
 function! go_analyzer#open_list()
