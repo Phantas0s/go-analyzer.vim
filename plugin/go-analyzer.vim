@@ -8,17 +8,22 @@ if !exists('g:go_analyzer_list_type')
     let g:go_analyzer_list_type = 'quickfix'
 endif
 
+if !exists('g:go_analyzer_regex')
+    ""
+    " Only display lines of the analyzer matching some regex
+    let g:go_analyzer_regex = {}
+endif
+
+if !exists('g:go_analyzer_decision_level')
+    ""
+    " Depth of decision level to print (1 or 2)
+    let g:go_analyzer_decision_level = 2
+endif
 
 if !exists('g:go_analyzer_show_signs')
     ""
     " Show signs in the gutter
     let g:go_analyzer_show_signs = 1
-endif
-
-if !exists('g:go_analyzer_regex')
-    ""
-    " Only display lines of the analyzer matching some regex
-    let g:go_analyzer_regex = {'escape': 'escapes to heap', 'inline': 'inlining call'}
 endif
 
 if !exists('g:go_analyzer_custom_signs')

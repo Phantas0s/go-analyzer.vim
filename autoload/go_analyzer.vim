@@ -6,7 +6,13 @@ let s:go_analyzer_enabled = 0
 
 function! go_analyzer#Analyze()
     call go_analyzer#reset()
-    let l:lines = systemlist('go build -gcflags -m '.expand('%:h').'/*.go')
+
+    let l:decision_level = '-m'
+    if g:go_analyzer_decision_level ==# 2
+        let l:decision_level = '-m -m'
+    endif
+        
+    let l:lines = systemlist('go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go')
 
     let l:list_items = {}
     for line in l:lines
@@ -14,25 +20,24 @@ function! go_analyzer#Analyze()
             let l:pos = split(line, ':')
             let l:lineNo = 0 + l:pos[1]
 
-            " let l:sign_type = ''
-            " if line =~# 'escapes to heap'
-            "     let l:sign_type = 'escape'
-            " elseif line =~# 'inlining call'
-            "     let l:sign_type = 'inline'
-            " else
-            "     continue
-            " endif
-
             let l:sign_type = ''
-            for [sign_type, regex] in items(g:go_analyzer_regex)
+            if len(g:go_analyzer_regex) ==# 0 
+                " TODO doesn't make sense... 
+                let l:sign_type = "inline"
+            else
+            for [type, regex] in items(g:go_analyzer_regex)
                 if line =~# regex
-                    let l:sign_type = sign_type
+                    let l:sign_type = type
                 endif
             endfor
+            endif
 
+            " TODO needs another way to verify if we include the line, signs shouldn't be the way...
             if len(l:sign_type) > 0 && get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
                 let s:go_analyzer_enabled = 1
+                " sign concatenation
                 let s:go_analyzer_signs[l:lineNo] = get(s:go_analyzer_signs, l:lineNo, '') . l:sign_type
+                " TODO shouldn't add to list before sorting all of that
                 call go_analyzer#add_to_list(line)
             endif
         endif
