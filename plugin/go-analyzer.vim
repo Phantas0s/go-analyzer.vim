@@ -17,7 +17,7 @@ endif
 if !exists('g:go_analyzer_decision_level')
     ""
     " Depth of decision level to print (1 or 2)
-    let g:go_analyzer_decision_level = 2
+    let g:go_analyzer_decision_level = 1
 endif
 
 if !exists('g:go_analyzer_show_signs')
@@ -29,7 +29,12 @@ endif
 if !exists('g:go_analyzer_custom_signs')
     ""
     " Default highlighting, use let g:go_analyzer_custom_signs = 0 to disable
-    " and define your own. Defaults:
+    " and define your own.
+    "
+    " If you provide your own regex with g:go_analyzer_show_regex, you can choose a sign with the value of 
+    " each key, i.e go_analyzer_default_<g:go_analyzer_regex key>
+    "
+    " sign define go_analyzer_default text=x 
     "
     " sign define go_analyzer_inline text=i texthl=Search
     "
@@ -38,14 +43,16 @@ if !exists('g:go_analyzer_custom_signs')
     " sign define go_analyzer_escapeinline text=ei texthl=Error
     "
     " sign define go_analyzer_inlineescape text=ei texthl=Error
+    "
     let g:go_analyzer_custom_signs = 0
 endif
 
 if g:go_analyzer_custom_signs == 0
+    sign define go_analyzer_default text=x texthl=Search
     sign define go_analyzer_inline text=i texthl=Search
     sign define go_analyzer_escape text=e texthl=Error
     sign define go_analyzer_escapeinline text=ei texthl=Error
     sign define go_analyzer_inlineescape text=ei texthl=Error
 endif
 
-command! GoAnalyzeToggle :call go_analyzer#Toggle()
+command! -nargs=? GoAnalyzeToggle :call go_analyzer#Toggle(<args>)

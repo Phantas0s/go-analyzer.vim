@@ -3,18 +3,20 @@
 
 let s:go_analyzer_signs = {}
 let s:go_analyzer_enabled = 0
+let s:set_lines = {}
+let s:set_repeated_lines = {}
 
-function! go_analyzer#Analyze()
+function! go_analyzer#Analyze(...)
     call go_analyzer#reset()
 
     let l:decision_level = '-m'
-    if g:go_analyzer_decision_level ==# 2
+    let arg1 = get(a:, 1, 0)
+    if arg1 && a:1 ==# 2
         let l:decision_level = '-m -m'
     endif
         
     let l:lines = systemlist('go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go')
-
-    let l:list_items = {}
+    echom l:decision_level
     for line in l:lines
         if  line =~# expand('%')
             let l:pos = split(line, ':')
@@ -22,32 +24,49 @@ function! go_analyzer#Analyze()
 
             let l:sign_type = ''
             if len(g:go_analyzer_regex) ==# 0 
-                " TODO doesn't make sense... 
-                let l:sign_type = "inline"
+                let l:sign_type = "default"
             else
-            for [type, regex] in items(g:go_analyzer_regex)
-                if line =~# regex
-                    let l:sign_type = type
-                endif
-            endfor
+                for [type, regex] in items(g:go_analyzer_regex)
+                    if line =~# regex
+                        let l:sign_type = type
+                    endif
+                endfor
             endif
 
-            " TODO needs another way to verify if we include the line, signs shouldn't be the way...
             if len(l:sign_type) > 0 && get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
                 let s:go_analyzer_enabled = 1
                 " sign concatenation
                 let s:go_analyzer_signs[l:lineNo] = get(s:go_analyzer_signs, l:lineNo, '') . l:sign_type
-                " TODO shouldn't add to list before sorting all of that
-                call go_analyzer#add_to_list(line)
+                " TODO it seems there is a problem: no line in double seems to pass through.. to verify
+                call go_analyzer#stack_lines(l:lineNo, line)
             endif
         endif
     endfor
+
+    call go_analyzer#add_lines()
 
     if g:go_analyzer_show_signs ==# 1
         call go_analyzer#add_signs()
     endif
 
     cwindow
+endfunction
+
+function! go_analyzer#stack_lines(lineNo, line)
+    if has_key(s:set_lines, a:lineNo)
+        let s:set_repeated_lines[a:lineNo] = a:line
+    else
+        let s:set_lines[a:lineNo] = a:line
+    endif
+endfunction
+
+function! go_analyzer#add_lines()
+	for key in sort(keys(s:set_lines))
+        call go_analyzer#add_to_list(s:set_lines[key])
+        if has_key(s:set_repeated_lines, key)
+            call go_analyzer#add_to_list(s:set_repeated_lines[key])
+        endif
+    endfor
 endfunction
 
 function go_analyzer#add_signs()
@@ -62,9 +81,14 @@ function go_analyzer#remove_signs()
     endfor
 endfunction
 
-function! go_analyzer#Toggle()
+function! go_analyzer#Toggle(...)
+    let arg1 = get(a:, 1, 0)
     if s:go_analyzer_enabled == 0
-        call go_analyzer#Analyze()
+        if arg1
+            call go_analyzer#Analyze(arg1)
+        else
+            call go_analyzer#Analyze()
+        endif
     else
         call go_analyzer#reset()
     endif
@@ -73,12 +97,12 @@ endfunction
 function! go_analyzer#reset()
     call go_analyzer#close_list()
     call go_analyzer#clear_list()
-
     call go_analyzer#remove_signs()
 
     let s:go_analyzer_signs = {}
     let s:go_analyzer_enabled = 0
-
+    let s:set_lines = {}
+    let s:set_repeated_lines = {}
 endfunction
 
 function! go_analyzer#open_list()
