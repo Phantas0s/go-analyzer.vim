@@ -11,7 +11,7 @@ endif
 if !exists('g:go_analyzer_regex')
     ""
     " Only display lines of the analyzer matching some regex
-    let g:go_analyzer_regex = {}
+    let g:go_analyzer_regex = {'inline': 'inlining call', 'escape': 'escapes to heap'}
 endif
 
 if !exists('g:go_analyzer_decision_level')

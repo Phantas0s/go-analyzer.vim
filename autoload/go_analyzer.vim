@@ -14,9 +14,9 @@ function! go_analyzer#Analyze(...)
     if arg1 && a:1 ==# 2
         let l:decision_level = '-m -m'
     endif
-        
+
     let l:lines = systemlist('go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go')
-    echom l:decision_level
+    echo 'go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go'
     for line in l:lines
         if  line =~# expand('%')
             let l:pos = split(line, ':')
@@ -33,11 +33,14 @@ function! go_analyzer#Analyze(...)
                 endfor
             endif
 
-            if len(l:sign_type) > 0 && get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
+            if len(l:sign_type) > 0
                 let s:go_analyzer_enabled = 1
-                " sign concatenation
-                let s:go_analyzer_signs[l:lineNo] = get(s:go_analyzer_signs, l:lineNo, '') . l:sign_type
-                " TODO it seems there is a problem: no line in double seems to pass through.. to verify
+
+                if get(s:go_analyzer_signs, l:lineNo, '') !~# l:sign_type
+                    " sign concatenation
+                    let s:go_analyzer_signs[l:lineNo] = get(s:go_analyzer_signs, l:lineNo, '') . l:sign_type
+                endif
+
                 call go_analyzer#stack_lines(l:lineNo, line)
             endif
         endif
@@ -54,18 +57,18 @@ endfunction
 
 function! go_analyzer#stack_lines(lineNo, line)
     if has_key(s:set_lines, a:lineNo)
-        let s:set_repeated_lines[a:lineNo] = a:line
+        let s:set_lines[a:lineNo] = add(s:set_lines[a:lineNo], a:line)
     else
-        let s:set_lines[a:lineNo] = a:line
+        let s:set_lines[a:lineNo] = []
+        let s:set_lines[a:lineNo] = add(s:set_lines[a:lineNo], a:line)
     endif
 endfunction
 
 function! go_analyzer#add_lines()
 	for key in sort(keys(s:set_lines))
-        call go_analyzer#add_to_list(s:set_lines[key])
-        if has_key(s:set_repeated_lines, key)
-            call go_analyzer#add_to_list(s:set_repeated_lines[key])
-        endif
+        for content in s:set_lines[key]
+            call go_analyzer#add_to_list(content)
+        endfor
     endfor
 endfunction
 
@@ -83,7 +86,7 @@ endfunction
 
 function! go_analyzer#Toggle(...)
     let arg1 = get(a:, 1, 0)
-    if s:go_analyzer_enabled == 0
+    if s:go_analyzer_enabled ==# 0
         if arg1
             call go_analyzer#Analyze(arg1)
         else
