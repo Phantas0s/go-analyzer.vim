@@ -1,10 +1,6 @@
-" TODO see if every possible message are documented somewhere (to get rid of these signs everywhere even if somebody don't want them)
-" TODO 
-
 let s:go_analyzer_signs = {}
 let s:go_analyzer_enabled = 0
 let s:set_lines = {}
-let s:set_repeated_lines = {}
 
 function! go_analyzer#Analyze(...)
     call go_analyzer#reset()
@@ -15,8 +11,7 @@ function! go_analyzer#Analyze(...)
         let l:decision_level = '-m -m'
     endif
 
-    let l:lines = systemlist('go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go')
-    echo 'go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/*.go'
+    let l:lines = systemlist('go build -gcflags "'. l:decision_level . '" ' .expand('%:h').'/'.expand('%'))
     for line in l:lines
         if  line =~# expand('%')
             let l:pos = split(line, ':')
@@ -24,7 +19,7 @@ function! go_analyzer#Analyze(...)
 
             let l:sign_type = ''
             if len(g:go_analyzer_regex) ==# 0 
-                let l:sign_type = "default"
+                let l:sign_type = 'default'
             else
                 for [type, regex] in items(g:go_analyzer_regex)
                     if line =~# regex
@@ -105,7 +100,6 @@ function! go_analyzer#reset()
     let s:go_analyzer_signs = {}
     let s:go_analyzer_enabled = 0
     let s:set_lines = {}
-    let s:set_repeated_lines = {}
 endfunction
 
 function! go_analyzer#open_list()
@@ -114,7 +108,7 @@ function! go_analyzer#open_list()
     elseif g:go_analyzer_list_type ==# 'locationlist'
         lwindow
     else
-        echom 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
+        echoerr 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
     endif
 endfunction
 
@@ -124,7 +118,7 @@ function! go_analyzer#close_list()
     elseif g:go_analyzer_list_type ==# 'locationlist'
         lclose
     else
-        echom 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
+        echoerr 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
     endif
 endfunction
 
@@ -134,7 +128,7 @@ function! go_analyzer#clear_list()
     elseif g:go_analyzer_list_type ==# 'locationlist'
         call setloclist([])
     else
-        echom 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
+        echoerr 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
     endif
 endfunction
 
@@ -145,6 +139,6 @@ function! go_analyzer#add_to_list(line)
     elseif g:go_analyzer_list_type ==# 'locationlist'
         laddexpr a:line
     else
-        echom 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
+        echoerr 'go_analyzer.vim error: unknown list type '.g:go_analyzer_list_type
     endif
 endfunction

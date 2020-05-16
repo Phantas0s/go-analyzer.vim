@@ -14,12 +14,6 @@ if !exists('g:go_analyzer_regex')
     let g:go_analyzer_regex = {'inline': 'inlining call', 'escape': 'escapes to heap'}
 endif
 
-if !exists('g:go_analyzer_decision_level')
-    ""
-    " Depth of decision level to print (1 or 2)
-    let g:go_analyzer_decision_level = 1
-endif
-
 if !exists('g:go_analyzer_show_signs')
     ""
     " Show signs in the gutter
@@ -48,7 +42,7 @@ if !exists('g:go_analyzer_custom_signs')
 endif
 
 if g:go_analyzer_custom_signs == 0
-    sign define go_analyzer_default text=x texthl=Search
+    sign define go_analyzer_default text=o texthl=Search
     sign define go_analyzer_inline text=i texthl=Search
     sign define go_analyzer_escape text=e texthl=Error
     sign define go_analyzer_escapeinline text=ei texthl=Error
